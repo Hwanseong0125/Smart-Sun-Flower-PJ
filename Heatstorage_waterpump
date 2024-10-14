@@ -1,0 +1,124 @@
+// 워터펌프 코딩
+// 숫자+문자 B.T 통신 참고자료
+#include <SoftwareSerial.h> // 블루투스 라이브러리
+SoftwareSerial BT(2,3); // 블루투스 모듈 TX 2, RX 3 번핀 사용
+
+int WM1=8; // WaterMotor1 8번핀 (상수도 펌프)
+int WM2=9; // WaterMotor2 9번핀 (보조 물통 순환 펌프)
+int WM3=10; // WaterMotor3 10번핀 (보조 물통 펌프)
+int WM4=11; // WaterMotor4 11번핀 (물탱크 순환 펌프)
+
+char buf[20];
+char buf_i=0;
+char t=0;
+int a=0,b=0,c=0,d=0;
+
+void setup() {
+  
+Serial.begin(9600);
+BT.begin(9600);
+
+pinMode(8,OUTPUT);
+pinMode(9,OUTPUT);
+pinMode(10,OUTPUT);
+pinMode(11,OUTPUT);
+}
+
+void loop() {
+   while (BT.available()) {
+    t = BT.read();
+    
+   Serial.print(t);
+    
+    if(t == 'a') //
+    {
+      a=atoi(buf); //a를 만나기 전까지 숫자를 a에 넣기
+      for(int i=0;i<21;i++)//a에 숫자를 집어넣었으므로 버퍼를 초기화
+      {
+         buf[i]=NULL;
+      }
+      buf_i=0; 
+    }
+    else if(t == 'b')
+    {
+      b=atoi(buf);
+      for(int i=0;i<21;i++)//초기화
+      {
+         buf[i]=NULL;
+      }
+      buf_i=0;
+    }
+    else if(t == 'c')
+    {
+      c=atoi(buf);
+      for(int i=0;i<21;i++)//초기화
+      {
+         buf[i]=NULL;
+      }
+      buf_i=0;
+    }
+    else if(t == 'd')
+    {
+      d=atoi(buf);
+      for(int i=0;i<21;i++)//초기화
+      {
+         buf[i]=NULL;
+      }
+      buf_i=0;
+    }
+    else //위에 입력한 알파벳이 아닌 경우 숫자로 입력받아 버퍼에 저장
+    {
+      buf[buf_i] = t;
+      buf_i++;
+    }
+  }
+
+  Serial.print(a);
+  Serial.print("   ");
+  Serial.print(b);
+  Serial.print("   ");
+  Serial.print(c);
+  Serial.print("   ");
+  Serial.print(d);
+  Serial.println("   ");
+
+  if(a==1) // 수위센서 1에 물이 없으면 1a 수신
+  {
+    digitalWrite(8,HIGH); // 워터 펌프 1 HIGH
+  }
+  else // 수위센서 1에 물이 있으면 0a 수신
+  {
+    digitalWrite(8,LOW); // 워터 펌프 1 LOW
+  }
+  delay(100);
+
+  if(b==1) // 보조 물통의 온도 센서 2의 값이 60도 이상일 때 1b 수신
+  {
+    digitalWrite(10,HIGH); // 워터 펌프 3 HIGH
+  }
+  else // 보조 물통의 온도 센서 2의 값이 60도 미만일 때 0b 수신
+  {
+    digitalWrite(10,LOW); // 워터 펌프 3 LOW
+  }
+  delay(100);
+
+  if(c==1) // 보조 물통의 온도 센서 1, 2 값의 차이가 +-3도 이상이면 1c 수신
+  {
+    digitalWrite(9,HIGH); // 워터 펌프 2 HIGH
+  }
+  else // 보조 물통의 온도 센서 1, 2 값의 차이가 +-3도 미만이면 1c 수신
+  {
+    digitalWrite(9,LOW); // 워터 펌프 2 LOW
+  }
+  delay(100);
+
+  if(d==1) // 물탱크의 온도 센서 3, 4 값의 차이가 +-3도 이상이면 1d 수신
+  {
+    digitalWrite(11,HIGH); // 워터 펌프 4 HIGH
+  }
+  else // 물탱크의 온도 센서 3, 4 값의 차이가 +-3도 미만이면 1d 수신
+  {
+    digitalWrite(11,LOW); // 워터 펌프 4 LOW
+  }
+  delay(100);
+}
